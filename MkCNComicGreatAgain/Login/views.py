@@ -24,8 +24,8 @@ class UserRegister(APIView):
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             # 以下是邮箱发送
-            id = User.objects.filter(username=username).values('id').first()
 
+            id = User.objects.filter(username=username).values('id').first()
             # 创建一个isdangerous的对象，传入我们设置中的密钥
             idsfy = ts(settings.SECRET_KEY)
             print(idsfy)
@@ -34,12 +34,11 @@ class UserRegister(APIView):
                 'username': username,
                 'email': email,
             }
-
             # 生成isdangerous token
             token = idsfy.dumps(data).decode()
             # 拼接路径
             print(token)
-            url = 'http://127.0.0.1:8000/email/vary/?token=' + token
+            url = 'http://127.0.0.1:8000/Login/email/vary/?token=' + token
             # 拼接邮件内容
             url_str = '<a href=' + url + '>click to verify ur email</a>'
             # print(instance)
@@ -87,13 +86,6 @@ class UserDetail(APIView):
         user = self.get_object(name)
         serializer = UserSerializers(user)
         return Response(serializer.data)
-    
-
-class EmailSend(UpdateAPIView):
-    serializer_class = UserSerializers
-
-    def get_object(self):
-        return self.request.user
 
 
 class EmailVaryView(APIView):
@@ -105,14 +97,15 @@ class EmailVaryView(APIView):
         print(receive_token)
         # 如果没有收到token报错
         if not receive_token:
-            return Response({'err_msg:lack token'},status=401)
+            return Response({'err_msg:lack token'}, status=401)
         #	新建一个isdangerous对象，将密钥传入
         ts_obj = ts(settings.SECRET_KEY)
         # 用带密钥的isdangerous对象解码传入token，注意两次密钥都是相同的
         data=ts_obj.loads(receive_token)
         print(data)
         # 获取token解码后的信息
-        user_id=data['user_id']
+        user_id=data['user_id']['id']
+
         username= data['username']
         email = data['email']
         # 用信息获取用户对象

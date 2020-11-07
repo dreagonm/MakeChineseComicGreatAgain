@@ -2,7 +2,6 @@ from django.db import models
 
 # Create your models here.
 
-
 class User(models.Model):
     # 用户名，最长40个字符
     username = models.CharField(max_length=40)
@@ -11,5 +10,5 @@ class User(models.Model):
     email = models.CharField(max_length=128)
     active_email = models.BooleanField(default=False)
 
-    class Meta:
-        ordering = ('created',)
+    # class Meta:
+    #     ordering = ('created',)

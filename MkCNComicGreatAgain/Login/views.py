@@ -1,6 +1,6 @@
 from Login.models import User
 from Login.serializers import UserSerializers
-from django.http import Http404
+from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -10,19 +10,40 @@ from django.conf import settings
 # Create your views here.
 
 
-class UserList(APIView):
-    def post(self,request):
+class UserRegister(APIView):
+    def post(self,request, *args, **kwargs):
         # post的data 中包含属性为 username, password, email
+        print(request.data)
         serializer = UserSerializers(data=request.data)
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             serializer.save()
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
+class UserLogin(APIView):
+    def post(self, request, *args, **kwargs):
+        # 输入 username 和 password
+
+        username = request.data.get('username')
+        password = request.data.get('password')
+        if_name_right = User.objects.filter(username=username).first()
+
+        if_password_right = User.objects.filter(password=password).first()
+        if_isactive = User.objects.filter(username=username,password=password).values('active_email').first()
+        print(if_name_right)
+        if not if_name_right:
+            return HttpResponse('用户名错误')
+        if not if_password_right:
+            return HttpResponse('密码错误')
+        if if_isactive:
+            return HttpResponse('邮箱未激活')
+        return HttpResponse('登陆成功')
+
 
 class UserDetail(APIView):
+
     def get_object(self, name):
         try:
             return User.objects.get(UserName=name)

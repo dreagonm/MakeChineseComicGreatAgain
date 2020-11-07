@@ -8,18 +8,21 @@ from django.core.mail import send_mail
 
 class UserSerializers(serializers.ModelSerializer):
     def validate(self, attr):
+        print('come')
         username = attr.get('username')
         password = attr.get('password')
         email = attr.get('email')
         # 验证邮箱
-        if not re.match(r'.*?@.*?\\..*?', email):
+        if not re.match(r".*?@.*?\..*?", email):
+            print(email)
+
             raise serializers.ValidationError('邮箱格式错误')
-        if_email = User.objects.filter(Email=email).first()
+        if_email = User.objects.filter(email=email).first()
         if if_email:
             raise serializers.ValidationError('邮箱已注册')
         # 验证用户名是否重复
 
-        if_name = User.objects.filter(Username=username).first()
+        if_name = User.objects.filter(username=username).first()
         if if_name:
             raise serializers.ValidationError('用户名重复')
 
@@ -28,6 +31,11 @@ class UserSerializers(serializers.ModelSerializer):
             raise serializers.ValidationError('密码少于8位数')
         elif password.isdigit() or password.isalpha():
             raise serializers.ValidationError('密码至少为数字与字母的结合')
+        return attr
+
+    class Meta:
+        model = User
+        fields = '__all__'
 
     def update(self, instance, validated_data): # TODO：debug邮箱认证
         # instance是从数据库查询出的对象
@@ -60,6 +68,4 @@ class UserSerializers(serializers.ModelSerializer):
 
         return instance
 
-    class Meta:
-        model = User
-        fields = '__all__'
+

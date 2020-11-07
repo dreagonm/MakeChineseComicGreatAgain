@@ -12,4 +12,4 @@ class User(models.Model):
     active_email = models.BooleanField(default=False)
 
     class Meta:
-        ording = ('created',)
+        ordering = ('created',)

@@ -105,7 +105,7 @@ EMAIL_USE_SSL = True
 EMAIL_HOST = 'smtp.qq.com'  # smtp服务器地址，163是smtp.163.com
 EMAIL_PORT = 465  # 端口号25 or 465
 EMAIL_HOST_USER = '771642320@qq.com'  # 帐号
-EMAIL_HOST_PASSWORD = 'orgphzatylfpbfad'  # QQ邮箱的独立授权码
+EMAIL_HOST_PASSWORD = 'pvihatnmnohjbbbg'  # QQ邮箱的独立授权码
 EMAIL_FROM = 'CNC<771642320@qq.com>'  # 收件人看到的发件人，尖括号中的必须与上面的user一致
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 

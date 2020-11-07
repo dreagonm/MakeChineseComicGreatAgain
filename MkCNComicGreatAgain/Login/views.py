@@ -5,22 +5,55 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import UpdateAPIView
+import json
 from itsdangerous import TimedJSONWebSignatureSerializer as ts
 from django.conf import settings
+from django.core.mail import send_mail
+
 # Create your views here.
 
 
 class UserRegister(APIView):
     def post(self,request, *args, **kwargs):
         # post的data 中包含属性为 username, password, email
-        print(request.data)
+        email = request.data.get('email')
+        username = request.data.get('username')
+        password = request.data.get('password')
+
         serializer = UserSerializers(data=request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
+            # 以下是邮箱发送
+            id = User.objects.filter(username=username).values('id').first()
+
+            # 创建一个isdangerous的对象，传入我们设置中的密钥
+            idsfy = ts(settings.SECRET_KEY)
+            print(idsfy)
+            data = {
+                'user_id': id,
+                'username': username,
+                'email': email,
+            }
+
+            # 生成isdangerous token
+            token = idsfy.dumps(data).decode()
+            # 拼接路径
+            print(token)
+            url = 'http://127.0.0.1:8000/email/vary/?token=' + token
+            # 拼接邮件内容
+            url_str = '<a href=' + url + '>click to verify ur email</a>'
+            # print(instance)
+            email_url = email
+            # print(email_url)
+            # 发送验证邮件
+            send_mail(subject='hermit email active', message=url_str, from_email=settings.EMAIL_FROM,
+                      recipient_list=[email_url], html_message=url_str)
+
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+
 
 class UserLogin(APIView):
     def post(self, request, *args, **kwargs):

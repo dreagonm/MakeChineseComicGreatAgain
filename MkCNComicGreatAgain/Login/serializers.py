@@ -37,35 +37,35 @@ class UserSerializers(serializers.ModelSerializer):
         model = User
         fields = '__all__'
 
-    def update(self, instance, validated_data): # TODO：debug邮箱认证
-        # instance是从数据库查询出的对象
-        instance.email = validated_data['email']
-        instance.id = validated_data['id']
-        instance.username = validated_data['username']
-        # 这里更新一次email字段数据
-        instance.save()
-        # 创建一个isdangerous的对象，传入我们设置中的密钥
-        idsfy = ts(settings.SECRET_KEY)
-        # print(idsfy)
-        data = {
-            'user_id': instance.id,
-            'username': instance.username,
-            'email': instance.email,
-        }
-
-        # 生成isdangerous token
-        token = idsfy.dumps(data).decode()
-        # 拼接路径
-        url = 'http://127.0.0.1:8000/email/vary/?token=' + token
-        # 拼接邮件内容
-        url_str = '<a href=' + url + '>click to verify ur email</a>'
-        # print(instance)
-        email_url = validated_data['email']
-        # print(email_url)
-        # 发送验证邮件
-        send_mail(subject='hermit email active', message=url_str, from_email=settings.EMAIL_FROM,
-                  recipient_list=[email_url], html_message=url_str)
-
-        return instance
+    # def update(self, instance, validated_data): #
+    #     # instance是从数据库查询出的对象
+    #     instance.email = validated_data['email']
+    #     instance.id = validated_data['id']
+    #     instance.username = validated_data['username']
+    #     # 这里更新一次email字段数据
+    #     instance.save()
+    #     # 创建一个isdangerous的对象，传入我们设置中的密钥
+    #     idsfy = ts(settings.SECRET_KEY)
+    #     # print(idsfy)
+    #     data = {
+    #         'user_id': instance.id,
+    #         'username': instance.username,
+    #         'email': instance.email,
+    #     }
+    #
+    #     # 生成isdangerous token
+    #     token = idsfy.dumps(data).decode()
+    #     # 拼接路径
+    #     url = 'http://127.0.0.1:8000/email/vary/?token=' + token
+    #     # 拼接邮件内容
+    #     url_str = '<a href=' + url + '>click to verify ur email</a>'
+    #     # print(instance)
+    #     email_url = validated_data['email']
+    #     # print(email_url)
+    #     # 发送验证邮件
+    #     send_mail(subject='hermit email active', message=url_str, from_email=settings.EMAIL_FROM,
+    #               recipient_list=[email_url], html_message=url_str)
+    #
+    #     return instance
 
 

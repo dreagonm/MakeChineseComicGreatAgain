@@ -9,6 +9,7 @@ import json
 from itsdangerous import TimedJSONWebSignatureSerializer as ts
 from django.conf import settings
 from django.core.mail import send_mail
+from django.http import Http404
 
 # Create your views here.
 
@@ -76,14 +77,11 @@ class UserLogin(APIView):
 
 class UserDetail(APIView):
 
-    def get_object(self, name):
+    def get(self, request, name):
         try:
-            return User.objects.get(UserName=name)
+            user = User.objects.get(username=name)
         except User.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
-
-    def get(self, request, name):
-        user = self.get_object(name)
         serializer = UserSerializers(user)
         return Response(serializer.data)
 

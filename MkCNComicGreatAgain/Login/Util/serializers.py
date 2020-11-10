@@ -1,9 +1,6 @@
 from Login.models import User
 from rest_framework import serializers
 import re
-from itsdangerous import TimedJSONWebSignatureSerializer as ts
-from django.conf import settings
-from django.core.mail import send_mail
 
 
 class UserSerializers(serializers.ModelSerializer):

@@ -18,9 +18,10 @@ class Auth(BaseAuthentication):
             user_id = data['user_id']
             username = data['username']
             email = data['email']
+
             user_object = User.objects.filter(id=user_id, username=username, email=email).first()
             if user_object:
-                return user_object, token
+                return username, token
         except:
             raise exceptions.AuthenticationFailed('用户认证失败')
 

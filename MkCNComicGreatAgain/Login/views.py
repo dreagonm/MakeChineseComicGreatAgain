@@ -48,6 +48,7 @@ class UserLogin(APIView):
 class UserDetail(APIView):
 
     def get(self, request, name):
+        assert request.user == name
         try:
             user = User.objects.get(username=name)
         except User.DoesNotExist:

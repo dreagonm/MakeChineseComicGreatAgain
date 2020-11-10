@@ -17,10 +17,13 @@ def Create_Token(id, username, email):
     return token
 
 
-def Email_send(id, username, email):
-
+def Email_send(id, username, email, type):
     token = Create_Token(id, username, email)
-    url = 'http://127.0.0.1:8000/Login/email/vary/?token=' + token
+    if type == 1:
+        url = 'http://127.0.0.1:8000/Login/email/vary/?token=' + token
+    else :
+        url = 'http://127.0.0.1:8000/Login/email/find/?token=' + token + '&?type=2'
+
     # 拼接邮件内容
     url_str = '<a href=' + url + '>click to verify ur email</a>'
 

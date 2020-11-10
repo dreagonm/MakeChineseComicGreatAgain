@@ -20,7 +20,7 @@ class UserRegister(APIView):
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             # 发送激活邮件
-            func.Email_send(id, username, email)
+            func.Email_send(id, username, email, 1)
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
@@ -45,6 +45,27 @@ class UserLogin(APIView):
         else:
             return HttpResponse(text)
 
+    def put(self, request, *args, **kwargs):
+        # 此处找回密码
+        username = request.data.get('username')
+        email = request.data.get('email')
+        if username != '':
+            try:
+                user = User.objects.get(username=username)
+            except User.DoesNotExist:
+                return Response('无此用户', status=status.HTTP_404_NOT_FOUND)
+        elif email != '':
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                return Response('无此用户', status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response('不能为空')
+        if user.active_email == 0:
+            return Response('邮箱未激活')
+        func.Email_send(user.id, user.name, user.email, 2)
+
+
 class UserDetail(APIView):
 
     def get(self, request, name):
@@ -60,14 +81,30 @@ class UserDetail(APIView):
 class EmailVaryView(APIView):
 
     def get(self,request):
-        # 得到url中的token信息
-        print(1)
-        receive_token = request.query_params.get('token')
-        print(2)
-        # 验证token, 并从token中获取用户信息
-        user_list = func.Email_Vary(receive_token)
 
-        user_obj=User.objects.get(id=user_list[0],username=user_list[1],email=user_list[2])
-        user_obj.active_email = True
-        user_obj.save()
-        return Response('邮箱激活成功')
+        if request.query_params.get('type') == None :
+
+            # 得到url中的token信息
+            receive_token = request.query_params.get('token')
+            # 验证token, 并从token中获取用户信息
+            user_list = func.Email_Vary(receive_token)
+
+            user_obj=User.objects.get(id=user_list[0],username=user_list[1],email=user_list[2])
+            user_obj.active_email = True
+            user_obj.save()
+            return Response('邮箱激活成功')
+        else:
+            # 此时转到put 即重置密码
+            return Response('该用户已激活')
+
+    def put(self, request, *args, **kwargs):
+        token = request.query_params.get('token')
+        user_list = func.Create_Token(token)
+        user_obj = User.objects.get(id=user_list[0], username=user_list[1], email=user_list[2])
+        password = request.data.get('password')
+        user_obj.password = password
+        return Response('密码重置成功')
+
+
+
+

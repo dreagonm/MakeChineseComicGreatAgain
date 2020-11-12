@@ -27,12 +27,25 @@ class UserRegister(APIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
+class UsernameCheck(APIView):
+    authentication_classes = []
+
+    def post(self,request, *args, **kwargs):
+        username = request.data.get('username')
+        if_right = User.objects.filter(username=username).first()
+        if not if_right:
+            return Response('用户名重复')
+        else:
+            return Response('用户名可用')
+
 class UserLogin(APIView):
     authentication_classes = []
+
     def post(self, request, *args, **kwargs):
         # 输入 username 和 password
         # 此处是登陆界面
         # 账号密码验证
+
         username = request.data.get('username')
         password = request.data.get('password')
 
@@ -64,6 +77,7 @@ class UserLogin(APIView):
         if user.active_email == 0:
             return Response('邮箱未激活')
         func.Email_send(user.id, user.name, user.email, 2)
+        return Response('已发送邮件')
 
 
 class UserDetail(APIView):

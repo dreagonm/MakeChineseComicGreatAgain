@@ -76,7 +76,7 @@ class UserLogin(APIView):
             return Response('不能为空')
         if user.active_email == 0:
             return Response('邮箱未激活')
-        func.Email_send(user.id, user.name, user.email, 2)
+        func.Email_send(user.id, user.username, user.email, 2)
         return Response('已发送邮件')
 
 
@@ -113,10 +113,15 @@ class EmailVaryView(APIView):
 
     def put(self, request, *args, **kwargs):
         token = request.query_params.get('token')
-        user_list = func.Create_Token(token)
+        print(token)
+        user_list = func.Email_Vary(token)
         user_obj = User.objects.get(id=user_list[0], username=user_list[1], email=user_list[2])
         password = request.data.get('password')
+        print(password)
         user_obj.password = password
+        user_obj.save()
+
+        print(user_obj.password)
         return Response('密码重置成功')
 
 

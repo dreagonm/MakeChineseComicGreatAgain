@@ -1,10 +1,8 @@
 from Login.models import User
 from Login.Util.serializers import UserSerializers
 from Login.Util import func
-from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
 
 # Create your views here.
 
@@ -13,117 +11,103 @@ class UserRegister(APIView):
     authentication_classes = []
 
     def post(self,request, *args, **kwargs):
+
         # post的data 中包含属性为 username, password, email
+
         email = request.data.get('email')
         username = request.data.get('username')
+        password = request.data.get('password')
+        return_message = func.Message_Check(email, username, password)
+
+        if return_message != '注册成功':
+            return Response(return_message)
         serializer = UserSerializers(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            # 发送激活邮件
-            func.Email_send(id, username, email, 1)
+        serializer.save()
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        func.Email_send(username, email)
+        return Response(return_message)
 
+    def get(self, request, *args, **kwargs):
 
-class UsernameCheck(APIView):
-    authentication_classes = []
+        # 用户名持续重复检测
 
-    def post(self,request, *args, **kwargs):
         username = request.data.get('username')
         if_right = User.objects.filter(username=username).first()
+        if username == '':
+            return Response('用户名不能为空')
         if not if_right:
             return Response('用户名重复')
         else:
             return Response('用户名可用')
+
 
 class UserLogin(APIView):
     authentication_classes = []
 
     def post(self, request, *args, **kwargs):
         # 输入 username 和 password
-        # 此处是登陆界面
         # 账号密码验证
 
         username = request.data.get('username')
         password = request.data.get('password')
-
         text = func.User_login(username, password)
+
         if text == '登陆成功':
-        # token获取
-            user = User.objects.get(username=username, password=password, )
-            token = func.Create_Token(user.id, user.username, user.email)
-            return HttpResponse(token)
+            user = User.objects.get(username=username)
+            token = func.Create_Token(username, user.email)
+            return Response(token)
         else:
-            return HttpResponse(text)
+            return Response(text)
 
-    def put(self, request, *args, **kwargs):
-        # 此处找回密码
-        username = request.data.get('username')
-        email = request.data.get('email')
-        if username != '':
-            try:
-                user = User.objects.get(username=username)
-            except User.DoesNotExist:
-                return Response('无此用户', status=status.HTTP_404_NOT_FOUND)
-        elif email != '':
-            try:
-                user = User.objects.get(email=email)
-            except User.DoesNotExist:
-                return Response('无此用户', status=status.HTTP_404_NOT_FOUND)
-        else:
-            return Response('不能为空')
-        if user.active_email == 0:
-            return Response('邮箱未激活')
-        func.Email_send(user.id, user.username, user.email, 2)
-        return Response('已发送邮件')
+    def get(self, request, *args, **kwargs):
 
-
-class UserDetail(APIView):
-
-    def get(self, request, name):
-        assert request.user == name
-        try:
-            user = User.objects.get(username=name)
-        except User.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        serializer = UserSerializers(user)
-        return Response(serializer.data)
+        token = request.data.get('token')
+        user_list = func.From_token(token)
+        if token == '无token':
+            return user_list
+        return Response({'用户名': user_list[0], '邮箱': user_list[1]})
 
 
 class EmailVaryView(APIView):
 
-    def get(self,request):
+    def get(self, request):
 
-        if request.query_params.get('type') == None :
+        receive_token = request.query_params.get('token')
 
-            # 得到url中的token信息
-            receive_token = request.query_params.get('token')
-            # 验证token, 并从token中获取用户信息
-            user_list = func.Email_Vary(receive_token)
+        user_list = func.From_token(receive_token)
+        if user_list == '无token':
+            return Response(user_list)
 
-            user_obj=User.objects.get(id=user_list[0],username=user_list[1],email=user_list[2])
-            user_obj.active_email = True
-            user_obj.save()
-            return Response('邮箱激活成功')
+        user_obj=User.objects.get(username=user_list[0], email=user_list[1])
+        user_obj.active_email = True
+        user_obj.save()
+        return Response('邮箱激活成功')
+
+
+class EmailFindView(APIView):
+
+    def post(self, request, *args, **kwargs):
+        username = request.data.get('username')
+        email = request.data.get('email')
+        return_message = func.Password_Find_Check(email, username)
+        if return_message == '已发送邮件':
+            func.Email_send(username, email, type=2)
+            return Response(return_message)
         else:
-            # 此时转到put 即重置密码
-            return Response('该用户已激活')
+            return Response(return_message)
 
     def put(self, request, *args, **kwargs):
-        token = request.query_params.get('token')
-        print(token)
-        user_list = func.Email_Vary(token)
-        user_obj = User.objects.get(id=user_list[0], username=user_list[1], email=user_list[2])
-        password = request.data.get('password')
-        print(password)
-        user_obj.password = password
+
+        new_password = request.query_params.get('password')
+        receive_token = request.query_params.get('token')
+        user_list = func.From_token(receive_token)
+
+        if user_list == '无token':
+            return Response(user_list)
+        return_message = func.Password_Change(new_password)
+        if return_message != '修改密码成功':
+            return Response(return_message)
+        user_obj = User.objects.get(username=user_list[0], email=user_list[1])
+        user_obj.password = new_password
         user_obj.save()
-
-        print(user_obj.password)
-        return Response('密码重置成功')
-
-
-
-
+        return Response(return_message)

@@ -6,9 +6,10 @@ from rest_framework.response import Response
 
 
 class UserRegister(APIView):
+
     authentication_classes = []
 
-    def post(self,request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         # post的data 中包含属性为 username, password, email
         # 数据在form-data中
         email = request.data.get('email')
@@ -17,27 +18,27 @@ class UserRegister(APIView):
         return_message = func.Register_Message_Check(email, username, password)
 
         if return_message != '注册成功，已发送邮件':
-            return Response(return_message)
+            return Response({'msg': 'EmailRegistered'})
         serializer = UserSerializers(data=request.data)
         serializer.is_valid()
         serializer.save()
 
         func.Email_send(username, email)
 
-        return Response(return_message)
+        return Response({'msg': 'true'})
 
-    def get(self, request, *args, **kwargs):
+    def put(self, request, *args, **kwargs):
 
         # 用户名持续重复检测
 
         username = request.data.get('username')
         if_right = User.objects.filter(username=username).first()
         if username == '':
-            return Response('用户名不能为空')
+            return Response({'success': 'false'})
         if not if_right:
-            return Response('用户名重复')
+            return Response({'success': 'false'})
         else:
-            return Response('用户名可用')
+            return Response({'success': 'true'})
 
 
 class UserLogin(APIView):
@@ -55,9 +56,9 @@ class UserLogin(APIView):
         if text == '登陆成功':
             user = User.objects.get(username=username)
             token = func.Create_Token(username, user.email)
-            return Response(token)
+            return Response({'success': 'true', 'token': token})
         else:
-            return Response(text)
+            return Response({'success': 'false'})
 
     def get(self, request, *args, **kwargs):
         # 数据在form-data中

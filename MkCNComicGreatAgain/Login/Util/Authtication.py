@@ -15,11 +15,10 @@ class Auth(BaseAuthentication):
             data = ts_obj.loads(token)
 
             # 获取token解码后的信息
-            user_id = data['user_id']
             username = data['username']
             email = data['email']
 
-            user_object = User.objects.filter(id=user_id, username=username, email=email).first()
+            user_object = User.objects.filter(username=username, email=email).first()
             if user_object:
                 return username, token
         except:

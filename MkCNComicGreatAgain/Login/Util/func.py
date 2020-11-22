@@ -1,7 +1,6 @@
 from itsdangerous import TimedJSONWebSignatureSerializer as ts
 from django.conf import settings
 from django.core.mail import send_mail
-from rest_framework.response import Response
 from Login.models import User
 import re
 
@@ -17,15 +16,15 @@ def Password_Find_Check(email, username):
         try:
             user = User.objects.get(username=username)
         except User.DoesNotExist:
-            return '无此用户'
+            return '错误'
     elif email != '':
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            return '无此用户'
+            return '错误'
     else:
-        return '不能为空'
-    return '已发送邮件'
+        return '错误'
+    return user
 
 def Register_Message_Check(email, username, password):
     # 验证邮箱
@@ -45,7 +44,7 @@ def Register_Message_Check(email, username, password):
         return '密码少于8位数'
     elif password.isdigit() or password.isalpha():
         return '密码至少为字母与数字的结合'
-    return '注册成功'
+    return '注册成功，已发送邮件'
 
 
 def Create_Token(username, email):
@@ -65,10 +64,11 @@ def Email_send(username, email, type=1):
     # 拼接邮件内容
     if type == 1:
         url = 'http://127.0.0.1:8000/Login/email/vary/?token=' + token
+        url_str = '<a href=' + url + '>click to verify ur email</a>'
     if type == 2:
         url = 'http://127.0.0.1:8000/Login/email/find/?token=' + token
-
-    url_str = '<a href=' + url + '>click to verify ur email</a>'
+        url_str = '<a href=' + url + '>click to change ur password</a>'
+        print(1)
 
     email_url = email
     # 发送验证邮件

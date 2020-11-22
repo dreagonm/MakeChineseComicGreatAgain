@@ -99,7 +99,8 @@ def User_login(username, password):
 
     if_name_right = User.objects.filter(username=username).first()
     if_password_right = User.objects.filter(password=password).first()
-    if_isactive = User.objects.filter(username=username, password=password).values('active_email').first()
+    if_isactive = User.objects.filter(username=username, password=password).values('active_email').first()['active_email']
+
     if not if_name_right:
         return '用户名错误'
     if not if_password_right:

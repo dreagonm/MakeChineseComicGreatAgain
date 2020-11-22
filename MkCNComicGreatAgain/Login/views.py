@@ -11,7 +11,6 @@ class UserRegister(APIView):
     authentication_classes = []
 
     def post(self,request, *args, **kwargs):
-
         # post的data 中包含属性为 username, password, email
 
         email = request.data.get('email')
@@ -47,6 +46,7 @@ class UserLogin(APIView):
     def post(self, request, *args, **kwargs):
         # 输入 username 和 password
         # 账号密码验证
+        # 数据在form-data中
 
         username = request.data.get('username')
         password = request.data.get('password')
@@ -61,10 +61,13 @@ class UserLogin(APIView):
 
     def get(self, request, *args, **kwargs):
 
-        token = request.data.get('token')
+        token = request.query_params.get('token')
+
         user_list = func.From_token(token)
-        if token == '无token':
-            return user_list
+
+        if user_list == '无token':
+            return Response(user_list)
+
         return Response({'用户名': user_list[0], '邮箱': user_list[1]})
 
 

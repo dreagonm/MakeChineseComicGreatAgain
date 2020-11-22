@@ -11,6 +11,13 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 from pathlib import Path
+import os
+import dotenv
+# 读取配置文件
+# 拼接路径为当前绝对路径下的.env文件
+dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
+# load_dovent作用解析.env文件的配置项写入环境变量
+dotenv.load_dotenv(dotenv_path)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'm0a@(%haqoc7dr3=!+s-q4^_)t&gj2ke0e4ylaw#^a&-r5&^9x'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -104,11 +111,10 @@ AUTH_PASSWORD_VALIDATORS = [
 EMAIL_USE_SSL = True
 EMAIL_HOST = 'smtp.qq.com'  # smtp服务器地址，163是smtp.163.com
 EMAIL_PORT = 465  # 端口号25 or 465
-EMAIL_HOST_USER = '771642320@qq.com'  # 帐号
-EMAIL_HOST_PASSWORD = 'qqemwruzbfosbcdd'  # QQ邮箱的独立授权码
-EMAIL_FROM = 'CNC<771642320@qq.com>'  # 收件人看到的发件人，尖括号中的必须与上面的user一致
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')  # 帐号
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')  # QQ邮箱的独立授权码
+EMAIL_FROM = os.environ.get('EMAIL_FROM')  # 收件人看到的发件人，尖括号中的必须与上面的user一致
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/

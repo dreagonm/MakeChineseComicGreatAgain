@@ -63,7 +63,7 @@ class UserLogin(APIView):
     def get(self, request, *args, **kwargs):
         # 数据在form-data中
         token = request.data.get('token')
-        print(token)
+        # print(token)
         user_list = func.From_token(token)
 
         if user_list == '无token':

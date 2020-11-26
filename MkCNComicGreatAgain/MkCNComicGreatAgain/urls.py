@@ -21,5 +21,6 @@ from Game import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     url('Login/', include("Login.urls")),
-    url('Game/',views.Guess.as_view()),
+    url('Game/', views.Guess.as_view()),
+    url('Bullet/', include('Bullet.urls'))
 ]

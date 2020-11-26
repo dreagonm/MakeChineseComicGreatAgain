@@ -1,4 +1,5 @@
 .vscode/
 # virtual environment
 develop/
+*.env
 MkCNComicGreatAgain/MkCNComicGreatAgain/.env

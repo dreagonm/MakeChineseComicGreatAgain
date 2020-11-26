@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'Login.apps.LoginConfig',
     'Game.apps.GameConfig',
+    'Bullet.apps.BulletConfig'
 ]
 
 MIDDLEWARE = [
@@ -114,7 +115,7 @@ EMAIL_HOST = 'smtp.qq.com'  # smtp服务器地址，163是smtp.163.com
 EMAIL_PORT = 465  # 端口号25 or 465
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')  # 帐号
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')  # QQ邮箱的独立授权码
-EMAIL_FROM = os.environ.get('EMAIL_FROM')  # 收件人看到的发件人，尖括号中的必须与上面的user一致
+EMAIL_FROM = os.environ.get('EMAIL_FROM')  # 收件人看到的发件人，括号中的必须与上面的user一致
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # Internationalization

@@ -21,3 +21,4 @@ class WordBullet(models.Model):
 
 
 
+
